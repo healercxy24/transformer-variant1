@@ -325,10 +325,10 @@ def visual(predicts, dataset_name, seq_len):
         if i == 0:
             pre_seq = predicts[i]
         else:
-            pre_seq = np.vstack((pre_seq, predicts[i]))  # [12800, 50]
+            pre_seq = np.vstack((pre_seq, predicts[i]))  # [12800, 50] [13056, 40]
     
     # delete the seq_len
-    pre_label = []    # 12800
+    pre_label = []    # 12800   13056
     for i in range(0, len(pre_seq)):
         pre_label.append(pre_seq[i, 0])
     
@@ -361,8 +361,9 @@ def visual(predicts, dataset_name, seq_len):
     
     
     # plot the label
-    plt.plot(test_truth, c='r', marker='o', label='Truth Data')
-    plt.plot(final_label, c='y', marker='o', label='Predicted Data')
+    plt.style.use('_mpl-gallery')
+    plt.plot(test_truth, marker = 'o', label='Truth Data')
+    plt.plot(final_label, marker = 'o', label='Predicted Data')
     plt.title('truth rul -- predicted rul (%s)' %dataset_name)
     plt.legend()
     plt.show()

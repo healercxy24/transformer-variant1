@@ -101,6 +101,7 @@ def test(model, criterion, batch_size):
     model.eval()  # turn on evaluation mode
 
     total_test_loss = 0
+    pre_result = []  # list(101) -> (50, 128, 1)
     num_batches = test_seq.shape[0] // batch_size
     src_mask = generate_square_subsequent_mask(test_seq.shape[2]).to(device)
       
@@ -109,7 +110,7 @@ def test(model, criterion, batch_size):
 
         for batch, i in enumerate(range(0, num_batches*batch_size, batch_size)):
             # compute the loss for the lower-level
-            inputs, targets = get_batch(train_seq, train_label, i, batch_size) #[40, 256, 18] [256, 40]
+            inputs, targets = get_batch(test_seq, test_label, i, batch_size) #[40, 256, 18] [256, 40]
             inputs = inputs.permute(2, 1, 0).float()   # [18, 256, 40]
             targets = targets.reshape(1, batch_size, seq_len).float() # [1, 256, 40]
             predictions = model(inputs, src_mask)   #[50,50,1]
@@ -117,11 +118,12 @@ def test(model, criterion, batch_size):
             loss = criterion(predictions, targets)               
             
             total_test_loss += loss.item()
+            pre_result.append(np.array(predictions.cpu()))
             
         total_test_loss = total_test_loss / num_batches
         
 
-    return total_test_loss
+    return total_test_loss, pre_result
     
     
 #%% running
@@ -133,7 +135,7 @@ import operator
 
 def objective(trial):
     
-    learning_rate = trial.suggest_loguniform('learning_rate', 1e-1, 10.0) 
+    learning_rate = trial.suggest_loguniform('learning_rate', 2.0, 2.0) 
     #learning_rate = 2.0
     nlayers = trial.suggest_int('nlayers', 2, 6)
     dropout = trial.suggest_loguniform('dropout', 0.001, 0.5)
@@ -145,14 +147,14 @@ def objective(trial):
     num_epochs = 100
     
     
-    #model = torch.load('temp_model_FD001_18.pk1').to(device)
+    #model = torch.load('temp_model.pk1').to(device)
     model = Transformer(d_model, nhead, nhid, nlayers, dropout).to(device)     
     criterion = nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), learning_rate)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 1.0, gamma=0.95)
 
-    best_result = study.best_value
-    #best_result = float('inf')
+
+    best_result = float('inf')
     
     
     
@@ -165,7 +167,7 @@ def objective(trial):
 
         train_loss = train(model, criterion, optimizer, batch_size)
         valid_loss = evaluate(model, criterion, batch_size)
-        test_loss = test(model, criterion, batch_size)
+        test_loss, pre_result = test(model, criterion, batch_size)
         
         trainloss.append(train_loss)
         validloss.append(valid_loss)
@@ -188,14 +190,17 @@ def objective(trial):
             print('-' * 89)
             
             
-            # save the best result with the smallest test loss
-            store_addr = 'temp_model_' + dataset_name + "_" + str(d_model) + '.pk1' 
+            # save the best result with the smallest test loss 
             if test_loss < best_result:
-                best_result = test_loss            
-                torch.save(model, store_addr)
+                best_result = test_loss  
+                torch.save(model, 'temp_model.pk1')
+
     
-    print(f' | test loss: {test_loss:5.2f} ')
-    torch.save(model, 'temp_model.pk1')
+    best_value = study.best_value
+    store_addr = 'model_' + dataset_name + "_" + str(d_model) + '.pk1' 
+    if test_loss < best_value:
+        best_value = test_loss  
+        torch.save(model, store_addr)
     
     # plot
     plt.plot(range(num_epochs), trainloss, label='train loss')

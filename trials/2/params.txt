@@ -1,0 +1,22 @@
+seq_len = 40
+dataset_name = 'FD001'
+norm_first=True
+lr=2.0 fixed
+
+input -> encoders -> memory -> decoder -> fc -> output
+
+
+[I 2022-06-30 14:24:57,970] 
+Trial 0 finished with value: 1883.7984786688112 and 
+parameters: 
+{'learning_rate': 2.0, 
+'nlayers': 2, 
+'dropout': 0.0031535913095908402, 
+'nhid': 400, 
+'nhead': 8, 
+'batch_size': 256}. 
+Best is trial 0 with value: 1883.7984786688112.
+study.best_params: {'batch_size': 256, 'dropout': 0.0031535913095908402, 'learning_rate': 2.0, 'nhead': 8, 'nhid': 400, 'nlayers': 2}
+study.best_value: 1883.7984786688112
+
+no obvious improvement compared with no norm first.

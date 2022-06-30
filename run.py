@@ -14,17 +14,6 @@ import optuna
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-'''
-study = optuna.create_study(study_name='test_loss_optim', direction="minimize", storage = "sqlite:///20220605_3.db", load_if_exists=True)  # Create a new study.
-df = study.best_trial.params
-learning_rate = df['learning_rate']
-seq_len = df['seq_len']
-nlayers = df['nlayers']
-dropout = df['dropout']
-nhid = df['nhid']
-seq_len = df['seq_len']
-'''
     
 
 def rmse(loss):
@@ -34,6 +23,7 @@ def rmse(loss):
     
 batch_size = 256
 seq_len = 40
+d_model = seq_len
 
 dataset_name = 'FD004'
 dataset = get_dataset(dataset_name, seq_len);
@@ -41,12 +31,12 @@ test_seq = dataset['lower_test_seq_tensor']
 test_label = dataset['lower_test_label_tensor']
 
 
-model = torch.load('temp_model_FD001_40.pk1').to(device)
+model = torch.load('temp_model.pk1').to(device)
 #criterion = RMSELoss()
 criterion = nn.MSELoss()
 
 
-def test(model, criterion):
+def test(model, criterion, batch_size):
 
     model.eval()  # turn on evaluation mode
 
@@ -60,10 +50,10 @@ def test(model, criterion):
 
         for batch, i in enumerate(range(0, num_batches*batch_size, batch_size)):
             # compute the loss for the lower-level
-            inputs, targets = get_batch(test_seq, test_label, i, batch_size)
-            inputs = inputs.permute(2, 1, 0)  # [18, 32, 50]
-            targets = targets.reshape(1, batch_size, seq_len)  #[1, 32, 50]
-            predictions = model(inputs, targets, src_mask)
+            inputs, targets = get_batch(test_seq, test_label, i, batch_size) #[40, 256, 18] [256, 40]
+            inputs = inputs.permute(2, 1, 0).float()   # [18, 256, 40]
+            targets = targets.reshape(1, batch_size, seq_len).float() # [1, 256, 40]
+            predictions = model(inputs, src_mask)   # [1, 256, 40]
             loss = criterion(predictions, targets)               
             
             total_test_loss += loss.item()
@@ -75,8 +65,11 @@ def test(model, criterion):
     return total_test_loss, pre_result
 
 
-test_loss , pre_result = test(model, criterion)
+test_loss , pre_result = test(model, criterion, batch_size)
 visual(pre_result, dataset_name, seq_len)
 
 print("best test loss(MSE):", test_loss)
 print("best test loss(RMSE):", rmse(test_loss))
+
+study_store_addr_HI = "sqlite:///%s_fea%s_HI.db" % (dataset_name, str(d_model))
+#df = optuna.create_study(study_name='HIpredict_optim_'+ dataset_name, direction="minimize", storage = study_store_addr_HI, load_if_exists=True)  

@@ -1,0 +1,10 @@
+
+FD1：
+{'batch_size': 256,
+ 'dropout': 0.1509301828493547,
+ 'learning_rate': 2.0,
+ 'nhead': 8,
+ 'nhid': 200,
+ 'nlayers': 5}
+best test loss(MSE): 1372.135462143842
+best test loss(RMSE): 37.04234687683601

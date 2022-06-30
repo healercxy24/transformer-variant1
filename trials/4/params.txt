@@ -1,0 +1,20 @@
+[I 2022-06-30 15:40:44,418] 
+Trial 6 finished with value: 912.6176799699372 and parameters: {
+'learning_rate': 2.0, 'nlayers': 3, 
+'dropout': 0.01780949693770143, 'nhid': 550, 
+'nhead': 8, 'batch_size': 256}. 
+Best is trial 6 with value: 912.6176799699372.
+study.best_params: {'batch_size': 256, 'dropout': 0.01780949693770143, 'learning_rate': 2.0, 'nhead': 8, 'nhid': 550, 'nlayers': 3}
+study.best_value: 912.6176799699372
+
+best test loss(MSE): 912.6176799699372
+best test loss(RMSE): 30.2095627239114
+
+best test loss(MSE): 986.76942097057
+best test loss(RMSE): 31.412886224773583
+
+best test loss(MSE): 815.9652161598206
+best test loss(RMSE): 28.565104868699862
+
+best test loss(MSE): 859.1903762817383
+best test loss(RMSE): 29.31194937703288

@@ -1,15 +1,14 @@
 seq_len = 40
 dataset_name = 'FD001'
-norm first
+norm_first=False
 
 input -> encoders -> memory -> decoder -> fc -> output
 
- [I 2022-06-30 13:03:12,198] Trial 27 finished with value: 1883.7180917777266 and parameters: {'learning_rate': 0.8035950259639951, 'nlayers': 2, 'dropout': 0.0014930796391170737, 'nhid': 450, 'nhead': 8, 'batch_size': 256}. Best is trial 27 with value: 1883.7180917777266.
-study.best_params: {
-'batch_size': 256, 
-'dropout': 0.0014930796391170737, 
-'learning_rate': 0.8035950259639951, 
+parameters: {
+'learning_rate': 0.6839996484435422, 
+'nlayers': 4, 
+'dropout': 0.0028315240394888347, 
+'nhid': 100, 
 'nhead': 8, 
-'nhid': 450, 
-'nlayers': 2}
-study.best_value: 1883.7180917777266
+'batch_size': 256}.
+study.best_value: 1884.0800039253984

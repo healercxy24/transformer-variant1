@@ -196,11 +196,11 @@ def objective(trial):
                 torch.save(model, 'temp_model.pk1')
 
     
-    best_value = study.best_value
-    store_addr = 'model_' + dataset_name + "_" + str(d_model) + '.pk1' 
-    if test_loss < best_value:
-        best_value = test_loss  
-        torch.save(model, store_addr)
+        best_value = study.best_value
+        store_addr = 'model_' + dataset_name + "_" + str(d_model) + '.pk1' 
+        if test_loss < best_value:
+            best_value = test_loss  
+            torch.save(model, store_addr)
     
     # plot
     plt.plot(range(num_epochs), trainloss, label='train loss')

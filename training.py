@@ -142,9 +142,9 @@ def objective(trial):
     nhid = trial.suggest_int('nhid', 50, 600, 50)    
     nhead = trial.suggest_int('nhead', 8, 8)
     #nhead = 2
-    batch_size = trial.suggest_int('batch_size', 256, 256)
+    batch_size = trial.suggest_int('batch_size', 16, 16)
     #seq_len = trial.suggest_int('seq_len', 20, 100, 5)
-    num_epochs = 100
+    num_epochs = 5
     
     
     #model = torch.load('temp_model.pk1').to(device)

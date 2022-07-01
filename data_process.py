@@ -207,12 +207,13 @@ def get_dataset(dataset_name, seq_len):
     # generate labels for train
     train_label = list(gen_labels(train_label, seq_len))
     train_label = np.array(train_label)   # torch.Size([20581])
-    #label_tensor = torch.tensor(train_label)
+    label_tensor = torch.tensor(train_label)
     
     #train_data = pca(train_data, 8)     
     seq_array = list(gen_sequence(train_data, seq_len))  
-    #seq_tensor = torch.tensor(seq_array)    # [20581, 50, 18]
-
+    seq_tensor = torch.tensor(seq_array)    # [20581, 50, 18]
+    
+    '''
     # shuffle the index
     np.random.seed(123)
     temp = np.arange(0, len(seq_array)) # [20581,]
@@ -231,9 +232,10 @@ def get_dataset(dataset_name, seq_len):
     new_label_tensor = np.array(new_label_tensor)
     new_seq_tensor = torch.tensor(new_seq_tensor)
     new_label_tensor = torch.tensor(new_label_tensor)
+    '''
     
     #split the new dataset
-    total_len = new_seq_tensor.shape[0]
+    total_len = seq_tensor.shape[0]
     train_len = int(total_len * 0.8)
     train_seq_tensor = seq_tensor[0:train_len,:].to(device)  # [16000, 50, 18]
     train_label_tensor = label_tensor[0:train_len].to(device)

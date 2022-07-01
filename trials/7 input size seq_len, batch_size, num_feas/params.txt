@@ -1,0 +1,29 @@
+seq_len = 40
+d_model = 18
+n_head = 2 (the embedding_dim(d_model) must be divisible by n_head)
+
+input size : (seq_len, batch_size, num_feas)
+output size : (seq_len, batch_size, 1)
+
+
+[I 2022-07-01 18:19:34,835] 
+Trial 5 finished with value: 857.5689338235294 
+and parameters: {
+'learning_rate': 5.0, 
+'nlayers': 3, 
+'dropout': 0.019621858437180367, 
+'nhid': 450, 
+'nhead': 2, 
+'batch_size': 256}.
+
+best test loss(MSE): 857.5689338235294
+best test loss(RMSE): 29.284277929010464
+
+best test loss(MSE): 941.1349674571644
+best test loss(RMSE): 30.677923128157882
+
+best test loss(MSE): 733.7245297431946
+best test loss(RMSE): 27.087349994844356
+
+best test loss(MSE): 774.4752614974975
+best test loss(RMSE): 27.829395636583584

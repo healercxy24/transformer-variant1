@@ -23,9 +23,9 @@ def rmse(loss):
     
 batch_size = 256
 seq_len = 40
-d_model = seq_len
+d_model = 18
 
-dataset_name = 'FD004'
+dataset_name = 'FD001'
 dataset = get_dataset(dataset_name, seq_len);
 test_seq = dataset['lower_test_seq_tensor']
 test_label = dataset['lower_test_label_tensor']
@@ -43,7 +43,7 @@ def test(model, criterion, batch_size):
     total_test_loss = 0
     pre_result = []  # list(101) -> (50, 128, 1)
     num_batches = test_seq.shape[0] // batch_size
-    src_mask = generate_square_subsequent_mask(test_seq.shape[2]).to(device)
+    src_mask = generate_square_subsequent_mask(seq_len).to(device)
       
     
     with torch.no_grad():
@@ -51,9 +51,9 @@ def test(model, criterion, batch_size):
         for batch, i in enumerate(range(0, num_batches*batch_size, batch_size)):
             # compute the loss for the lower-level
             inputs, targets = get_batch(test_seq, test_label, i, batch_size) #[40, 256, 18] [256, 40]
-            inputs = inputs.permute(2, 1, 0).float()   # [18, 256, 40]
-            targets = targets.reshape(1, batch_size, seq_len).float() # [1, 256, 40]
-            predictions = model(inputs, src_mask)   # [1, 256, 40]
+            inputs = inputs.float()   #[40, 256, 18]
+            targets = targets.reshape(seq_len, batch_size, 1).float() # [40, 256, 1]
+            predictions = model(inputs, src_mask)   # [40, 256, 1]
             loss = criterion(predictions, targets)               
             
             total_test_loss += loss.item()

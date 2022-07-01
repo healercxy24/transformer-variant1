@@ -1,0 +1,9 @@
+trainloss not stable, not a smooth decline in the beginning
+
+
+[I 2022-07-01 18:49:06,390] 
+Trial 9 finished with value: 855.6761477601294 
+and parameters: {
+'learning_rate': 5.0, 'nlayers': 6, 
+'dropout': 0.047490156466711404, 
+'nhid': 250, 'nhead': 2, 'batch_size': 256}.

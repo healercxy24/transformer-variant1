@@ -24,7 +24,7 @@ def add_RUL(dataset):
     # drop 'max' column
     dataset.drop('max', axis=1, inplace=True)
     
-
+    
     for index, row in rul.iteritems():
         if(row > 130):
             rul[index] = 130
@@ -45,11 +45,11 @@ def add_RUL_test(dataset, truth_rul):
     # drop 'max' column
     dataset.drop('max', axis=1, inplace=True)
     
-
+    
     for index, row in rul.iteritems():
         if(row > 130):
             rul[index] = 130
-
+    
     
     dataset['RUL'] = rul
     
@@ -213,7 +213,7 @@ def get_dataset(dataset_name, seq_len):
     seq_array = list(gen_sequence(train_data, seq_len))  
     seq_tensor = torch.tensor(seq_array)    # [20581, 50, 18]
     
-    '''
+    
     # shuffle the index
     np.random.seed(123)
     temp = np.arange(0, len(seq_array)) # [20581,]
@@ -232,15 +232,15 @@ def get_dataset(dataset_name, seq_len):
     new_label_tensor = np.array(new_label_tensor)
     new_seq_tensor = torch.tensor(new_seq_tensor)
     new_label_tensor = torch.tensor(new_label_tensor)
-    '''
+    
     
     #split the new dataset
-    total_len = seq_tensor.shape[0]
+    total_len = new_seq_tensor.shape[0]
     train_len = int(total_len * 0.8)
-    train_seq_tensor = seq_tensor[0:train_len,:].to(device)  # [16000, 50, 18]
-    train_label_tensor = label_tensor[0:train_len].to(device)
-    valid_seq_tensor = seq_tensor[train_len:,: ].to(device)  # [4581, 50, 18]
-    valid_label_tensor = label_tensor[train_len:].to(device)
+    train_seq_tensor = new_seq_tensor[0:train_len,:].to(device)  # [16000, 50, 18]
+    train_label_tensor = new_label_tensor[0:train_len].to(device)
+    valid_seq_tensor = new_seq_tensor[train_len:,: ].to(device)  # [4581, 50, 18]
+    valid_label_tensor = new_label_tensor[train_len:].to(device)
     
     
     '''process data for test dataset'''

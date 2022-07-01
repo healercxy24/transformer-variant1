@@ -1,0 +1,11 @@
+study.best_params
+Out[6]: 
+{'batch_size': 256,
+ 'dropout': 0.016344291511107063,
+ 'learning_rate': 5.0,
+ 'nhead': 8,
+ 'nhid': 150,
+ 'nlayers': 2}
+
+study.best_value
+Out[7]: 3540.0538425819545

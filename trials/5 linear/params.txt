@@ -1,0 +1,14 @@
+seq_len = 40
+no shuffle
+linear RUL values
+norm_first=True
+
+[I 2022-07-01 11:32:46,980] 
+Trial 6 finished with value: 3936.6342605890013 
+and parameters: {
+'learning_rate': 2.0, 
+'nlayers': 5, 
+'dropout': 0.0034675735725008413, 
+'nhid': 50, 
+'nhead': 8, 
+'batch_size': 256}.

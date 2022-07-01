@@ -2,6 +2,7 @@
 
 import torch
 import torch.nn as nn
+import matplotlib.pyplot as plt
 from data_process import *
 from model import *
 
@@ -32,7 +33,7 @@ test_seq = dataset['lower_test_seq_tensor']   # size [13046, 50, 18]
 test_label = dataset['lower_test_label_tensor']
 
 
-d_model = seq_len
+d_model = train_seq.shape[2]   # num_features
 
 
 #%% training
@@ -42,16 +43,15 @@ def train(model, criterion, optimizer, batch_size):
 
     total_train_loss = 0
     num_batches = train_seq.shape[0] // batch_size
-    src_mask = generate_square_subsequent_mask(train_seq.shape[2]).float().to(device)
+    src_mask = generate_square_subsequent_mask(seq_len).float().to(device)
     
     for batch, i in enumerate(range(0, (num_batches-1)*batch_size, batch_size)):
 
         # compute the loss for the lower-level
         inputs, targets = get_batch(train_seq, train_label, i, batch_size) #[40, 256, 18] [256, 40]
-        inputs = inputs.permute(2, 1, 0).float()   # [18, 256, 40]
-        targets = targets.reshape(1, batch_size, seq_len).float() # [1, 256, 40]
-        predictions = model(inputs, src_mask)   #[50,50,1]
-        #print(predictions)
+        inputs = inputs.float()   #[40, 256, 18]
+        targets = targets.reshape(seq_len, batch_size, 1).float() # [40, 256, 1]
+        predictions = model(inputs, src_mask)   # [40, 256, 1]
         loss = criterion(predictions, targets)        
             
         optimizer.zero_grad()      
@@ -73,7 +73,7 @@ def evaluate(model, criterion, batch_size):
 
     total_valid_loss = 0
     num_batches = valid_seq.shape[0] // batch_size
-    src_mask = generate_square_subsequent_mask(train_seq.shape[2]).to(device)
+    src_mask = generate_square_subsequent_mask(seq_len).to(device)
       
     
     with torch.no_grad():
@@ -82,9 +82,9 @@ def evaluate(model, criterion, batch_size):
 
             # compute the loss for the lower-level
             inputs, targets = get_batch(train_seq, train_label, i, batch_size) #[40, 256, 18] [256, 40]
-            inputs = inputs.permute(2, 1, 0).float()   # [18, 256, 40]
-            targets = targets.reshape(1, batch_size, seq_len).float() # [1, 256, 40]
-            predictions = model(inputs, src_mask)   #[50,50,1]
+            inputs = inputs.float()   #[40, 256, 18]
+            targets = targets.reshape(seq_len, batch_size, 1).float() # [40, 256, 1]
+            predictions = model(inputs, src_mask)   # [40, 256, 1]
             #print(predictions)
             loss = criterion(predictions, targets)               
             
@@ -103,7 +103,7 @@ def test(model, criterion, batch_size):
     total_test_loss = 0
     pre_result = []  # list(101) -> (50, 128, 1)
     num_batches = test_seq.shape[0] // batch_size
-    src_mask = generate_square_subsequent_mask(test_seq.shape[2]).to(device)
+    src_mask = generate_square_subsequent_mask(seq_len).to(device)
       
     
     with torch.no_grad():
@@ -111,10 +111,9 @@ def test(model, criterion, batch_size):
         for batch, i in enumerate(range(0, num_batches*batch_size, batch_size)):
             # compute the loss for the lower-level
             inputs, targets = get_batch(test_seq, test_label, i, batch_size) #[40, 256, 18] [256, 40]
-            inputs = inputs.permute(2, 1, 0).float()   # [18, 256, 40]
-            targets = targets.reshape(1, batch_size, seq_len).float() # [1, 256, 40]
-            predictions = model(inputs, src_mask)   #[50,50,1]
-            #print(predictions)
+            inputs = inputs.float()   #[40, 256, 18]
+            targets = targets.reshape(seq_len, batch_size, 1).float() # [40, 256, 1]
+            predictions = model(inputs, src_mask)   # [40, 256, 1]
             loss = criterion(predictions, targets)               
             
             total_test_loss += loss.item()
@@ -135,16 +134,16 @@ import operator
 
 def objective(trial):
     
-    learning_rate = trial.suggest_loguniform('learning_rate', 2.0, 2.0) 
+    learning_rate = trial.suggest_loguniform('learning_rate', 0.1, 10.0) 
     #learning_rate = 2.0
     nlayers = trial.suggest_int('nlayers', 2, 6)
     dropout = trial.suggest_loguniform('dropout', 0.001, 0.5)
     nhid = trial.suggest_int('nhid', 50, 600, 50)    
-    nhead = trial.suggest_int('nhead', 8, 8)
+    nhead = trial.suggest_int('nhead', 2, 2)
     #nhead = 2
-    batch_size = trial.suggest_int('batch_size', 16, 16)
+    batch_size = trial.suggest_int('batch_size', 256, 256)
     #seq_len = trial.suggest_int('seq_len', 20, 100, 5)
-    num_epochs = 5
+    num_epochs = 100
     
     
     #model = torch.load('temp_model.pk1').to(device)
@@ -205,6 +204,7 @@ def objective(trial):
     # plot
     plt.plot(range(num_epochs), trainloss, label='train loss')
     plt.plot(range(num_epochs), validloss, label='valid loss')
+    #plt.title()
     plt.legend()
     plt.show()
 
@@ -213,9 +213,9 @@ def objective(trial):
 
 study_store_addr_li = "sqlite:///%s_fea%s_li.db" % (dataset_name, str(d_model))
 study_store_addr_HI = "sqlite:///%s_fea%s_HI.db" % (dataset_name, str(d_model))
-#study = optuna.create_study(study_name='linearpredict_optim', direction="minimize", storage = study_store_addr_li, load_if_exists=True)
+#study = optuna.create_study(study_name='linearpredict_optim' + dataset_name, direction="minimize", storage = study_store_addr_li, load_if_exists=True)
 study = optuna.create_study(study_name='HIpredict_optim_'+ dataset_name, direction="minimize", storage = study_store_addr_HI, load_if_exists=True)  
-study.optimize(objective, n_trials=1)
+study.optimize(objective, n_trials=30)
 
 
 print('study.best_params:', study.best_params)

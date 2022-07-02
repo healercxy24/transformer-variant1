@@ -49,8 +49,9 @@ def train(model, criterion, optimizer, batch_size):
 
         # compute the loss for the lower-level
         inputs, targets = get_batch(train_seq, train_label, i, batch_size) #[40, 256, 18] [256, 40]
-        inputs = inputs.float()   #[40, 256, 18]
-        targets = targets.reshape(seq_len, batch_size, 1).float() # [40, 256, 1]
+        inputs = inputs.float()
+        targets = targets.permute(1, 0)
+        targets = torch.unsqueeze(targets, 2).float() # [40, 256, 1]
         predictions = model(inputs, src_mask)   # [40, 256, 1]
         loss = criterion(predictions, targets)        
             
@@ -81,11 +82,11 @@ def evaluate(model, criterion, batch_size):
         for batch, i in enumerate(range(0, (num_batches-1)*batch_size, batch_size)):
 
             # compute the loss for the lower-level
-            inputs, targets = get_batch(train_seq, train_label, i, batch_size) #[40, 256, 18] [256, 40]
-            inputs = inputs.float()   #[40, 256, 18]
-            targets = targets.reshape(seq_len, batch_size, 1).float() # [40, 256, 1]
+            inputs, targets = get_batch(valid_seq, valid_label, i, batch_size) #[40, 256, 18] [256, 40]
+            inputs = inputs.float()
+            targets = targets.permute(1, 0)
+            targets = torch.unsqueeze(targets, 2).float() # [40, 256, 1]
             predictions = model(inputs, src_mask)   # [40, 256, 1]
-            #print(predictions)
             loss = criterion(predictions, targets)               
             
             total_valid_loss += loss.item()
@@ -111,8 +112,9 @@ def test(model, criterion, batch_size):
         for batch, i in enumerate(range(0, num_batches*batch_size, batch_size)):
             # compute the loss for the lower-level
             inputs, targets = get_batch(test_seq, test_label, i, batch_size) #[40, 256, 18] [256, 40]
-            inputs = inputs.float()   #[40, 256, 18]
-            targets = targets.reshape(seq_len, batch_size, 1).float() # [40, 256, 1]
+            inputs = inputs.float()
+            targets = targets.permute(1, 0)
+            targets = torch.unsqueeze(targets, 2).float() # [40, 256, 1]
             predictions = model(inputs, src_mask)   # [40, 256, 1]
             loss = criterion(predictions, targets)               
             
@@ -215,7 +217,7 @@ study_store_addr_li = "sqlite:///%s_fea%s_li.db" % (dataset_name, str(d_model))
 study_store_addr_HI = "sqlite:///%s_fea%s_HI.db" % (dataset_name, str(d_model))
 #study = optuna.create_study(study_name='linearpredict_optim' + dataset_name, direction="minimize", storage = study_store_addr_li, load_if_exists=True)
 study = optuna.create_study(study_name='HIpredict_optim_'+ dataset_name, direction="minimize", storage = study_store_addr_HI, load_if_exists=True)  
-study.optimize(objective, n_trials=30)
+study.optimize(objective, n_trials=200)
 
 
 print('study.best_params:', study.best_params)
